@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>房产销售短视频脚本生成器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  h1 {
+    text-align: center;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: rgba(255,255,255,0.75);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #4a4a6a;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    border-radius: 2px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label { font-size: 13px; font-weight: 500; color: #555; }
+
+  input, textarea {
+    border: 1.5px solid #e0e0f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    background: #fafafa;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+    background: #fff;
+  }
+
+  .selling-points-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .usage-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f5f5ff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .usage-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e0e0f0;
+    transition: background 0.3s;
+  }
+
+  .dot.used { background: #667eea; }
+
+  .btn-generate {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .btn-generate:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  .btn-generate:active:not(:disabled) { transform: translateY(0); }
+  .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #667eea;
+    font-size: 14px;
+    padding: 20px 0;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #e0e0f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .scripts-container { display: flex; flex-direction: column; gap: 16px; }
+
+  .script-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .script-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+  }
+
+  .script-header.douyin { background: linear-gradient(90deg, #1a1a2e, #16213e); }
+  .script-header.xiaohongshu { background: linear-gradient(90deg, #ff2442, #ff6b6b); }
+  .script-header.shipinhao { background: linear-gradient(90deg, #07c160, #00a86b); }
+
+  .script-platform {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .platform-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .script-style-tag {
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.15);
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .script-body { padding: 20px; }
+
+  .script-content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #f8f8ff;
+    border-radius: 10px;
+    padding: 16px;
+    min-height: 80px;
+    border: 1px solid #ebebf5;
+  }
+
+  .btn-copy {
+    margin-top: 12px;
+    width: 100%;
+    padding: 9px;
+    border: 1.5px solid #e0e0f0;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-copy:hover { border-color: #667eea; color: #667eea; background: #f0f0ff; }
+  .btn-copy.copied { border-color: #07c160; color: #07c160; background: #f0fff5; }
+
+  .error-msg {
+    background: #fff5f5;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #c0392b;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .limit-banner {
+    background: linear-gradient(135deg, #fff3cd, #ffe8a1);
+    border: 1.5px solid #f0c040;
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  .limit-banner h3 { font-size: 16px; color: #7a5c00; margin-bottom: 6px; }
+  .limit-banner p { font-size: 13px; color: #9a7800; }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .selling-points-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>房产销售短视频脚本生成器</h1>
+  <p class="subtitle">输入房源信息，一键生成抖音 / 小红书 / 视频号三平台专属脚本</p>
+
+  <div class="card">
+    <div class="section-title">今日使用次数</div>
+    <div class="usage-bar">
+      <span id="usageText">免费次数：剩余 3 次（每天重置）</span>
+      <div class="usage-dots" id="usageDots">
+        <div class="dot" id="dot0"></div>
+        <div class="dot" id="dot1"></div>
+        <div class="dot" id="dot2"></div>
+      </div>
+    </div>
+
+    <div class="section-title">房源信息</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="propName">房源名称</label>
+        <input type="text" id="propName" placeholder="如：碧桂园·天悦府">
+      </div>
+      <div class="form-group">
+        <label for="location">地段</label>
+        <input type="text" id="location" placeholder="如：南山科技园核心区">
+      </div>
+      <div class="form-group">
+        <label for="floorPlan">户型</label>
+        <input type="text" id="floorPlan" placeholder="如：三房两厅 建面89㎡">
+      </div>
+      <div class="form-group">
+        <label for="price">价格</label>
+        <input type="text" id="price" placeholder="如：总价260万起">
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">核心卖点（3个）</div>
+    <div class="selling-points-grid">
+      <div class="form-group">
+        <label for="sp1">卖点 1</label>
+        <input type="text" id="sp1" placeholder="如：地铁口50米">
+      </div>
+      <div class="form-group">
+        <label for="sp2">卖点 2</label>
+        <input type="text" id="sp2" placeholder="如：顶级学区房">
+      </div>
+      <div class="form-group">
+        <label for="sp3">卖点 3</label>
+        <input type="text" id="sp3" placeholder="如：无遮挡珠江景">
+      </div>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generateScripts()">生成三平台脚本</button>
+    <div id="errorMsg" style="display:none"></div>
+  </div>
+
+  <div id="outputSection" style="display:none">
+    <div id="loadingDiv" class="loading" style="display:none">
+      <div class="spinner"></div>
+      正在生成脚本，请稍候...
+    </div>
+    <div class="scripts-container" id="scriptsContainer"></div>
+  </div>
+</div>
+
+<script>
+  // Track usage locally to update UI (server is authoritative)
+  function getLocalUsage() {
+    const today = new Date().toISOString().slice(0, 10);
+    const stored = JSON.parse(localStorage.getItem('usage') || '{}');
+    if (stored.date !== today) return 0;
+    return stored.count || 0;
+  }
+
+  function setLocalUsage(count) {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('usage', JSON.stringify({ date: today, count }));
+  }
+
+  function updateUsageUI(used) {
+    const remaining = Math.max(0, 3 - used);
+    document.getElementById('usageText').textContent =
+      remaining > 0
+        ? `免费次数：剩余 ${remaining} 次（每天重置）`
+        : '今日免费次数已用完';
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('dot' + i).className = 'dot' + (i < used ? ' used' : '');
+    }
+    if (remaining === 0) {
+      document.getElementById('generateBtn').disabled = true;
+      showLimitBanner();
+    }
+  }
+
+  function showLimitBanner() {
+    const existing = document.getElementById('limitBanner');
+    if (existing) return;
+    const banner = document.createElement('div');
+    banner.id = 'limitBanner';
+    banner.className = 'limit-banner';
+    banner.innerHTML = `
+      <h3>今日免费次数已用完</h3>
+      <p>每个IP每天可免费生成 3 次脚本，明天零点后自动重置。</p>
+    `;
+    document.getElementById('generateBtn').after(banner);
+  }
+
+  // Init UI
+  updateUsageUI(getLocalUsage());
+
+  async function generateScripts() {
+    const propName = document.getElementById('propName').value.trim();
+    const location = document.getElementById('location').value.trim();
+    const floorPlan = document.getElementById('floorPlan').value.trim();
+    const price = document.getElementById('price').value.trim();
+    const sp1 = document.getElementById('sp1').value.trim();
+    const sp2 = document.getElementById('sp2').value.trim();
+    const sp3 = document.getElementById('sp3').value.trim();
+
+    document.getElementById('errorMsg').style.display = 'none';
+
+    if (!propName || !location || !floorPlan || !price) return showError('请填写完整的房源信息（名称、地段、户型、价格）');
+    if (!sp1 || !sp2 || !sp3) return showError('请填写三个核心卖点');
+
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.textContent = '生成中...';
+
+    const outputSection = document.getElementById('outputSection');
+    const loadingDiv = document.getElementById('loadingDiv');
+    const scriptsContainer = document.getElementById('scriptsContainer');
+
+    outputSection.style.display = 'block';
+    loadingDiv.style.display = 'flex';
+    scriptsContainer.innerHTML = '';
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propName, location, floorPlan, price, sp1, sp2, sp3 })
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        setLocalUsage(3);
+        updateUsageUI(3);
+        loadingDiv.style.display = 'none';
+        showError(data.message || '今日免费次数已用完');
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || '请求失败');
+      }
+
+      // Update local usage counter
+      const used = 3 - (data.remaining ?? 0);
+      setLocalUsage(used);
+      updateUsageUI(used);
+
+      const parts = (data.text || '').split('---SPLIT---');
+      const platforms = [
+        { key: 'douyin', name: '抖音版', icon: '🎵', tag: '15秒钩子 + 60秒口播 + 行动号召' },
+        { key: 'xiaohongshu', name: '小红书版', icon: '📕', tag: '种草风格' },
+        { key: 'shipinhao', name: '视频号版', icon: '📱', tag: '信任感风格' }
+      ];
+
+      loadingDiv.style.display = 'none';
+
+      platforms.forEach((p, i) => {
+        const text = (parts[i] || '').trim();
+        const card = document.createElement('div');
+        card.className = 'script-card';
+        card.innerHTML = `
+          <div class="script-header ${p.key}">
+            <div class="script-platform">
+              <div class="platform-icon">${p.icon}</div>
+              ${p.name}
+            </div>
+            <span class="script-style-tag">${p.tag}</span>
+          </div>
+          <div class="script-body">
+            <div class="script-content" id="script-${p.key}">${escapeHtml(text)}</div>
+            <button class="btn-copy" onclick="copyScript('${p.key}', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              一键复制
+            </button>
+          </div>
+        `;
+        scriptsContainer.appendChild(card);
+      });
+
+    } catch (err) {
+      loadingDiv.style.display = 'none';
+      showError('生成失败：' + err.message);
+    } finally {
+      const remaining = 3 - getLocalUsage();
+      if (remaining > 0) {
+        btn.disabled = false;
+        btn.textContent = '生成三平台脚本';
+      }
+    }
+  }
+
+  function copyScript(key, btn) {
+    const text = document.getElementById('script-' + key).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 16 4 11"></polyline></svg> 已复制！`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 一键复制`;
+      }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.classList.add('copied');
+      btn.textContent = '已复制！';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 一键复制`;
+      }, 2000);
+    });
+  }
+
+  function showError(msg) {
+    const div = document.getElementById('errorMsg');
+    div.className = 'error-msg';
+    div.textContent = msg;
+    div.style.display = 'block';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT' && !document.getElementById('generateBtn').disabled) {
+      generateScripts();
+    }
+  });
+</script>
+</body>
+</html>
